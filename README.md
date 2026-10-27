@@ -1,6 +1,6 @@
 # midasplugin
 
-A Claude skill for building plugins for **MIDAS CIVIL NX**.
+A GitHub Copilot skill and custom agent for building plugins for **MIDAS CIVIL NX**.
 
 A CIVIL NX plugin is a static web page in a zip: the host opens `index.html` in
 an embedded browser, hands it a MAPI key, and the page talks to CIVIL NX over
@@ -14,7 +14,10 @@ JSON manual.
 ## What's in it
 
 ```
-SKILL.md                      the workflow and the five rules that cost the most time
+.github/
+  skills/midasplugin/SKILL.md  the canonical workflow and six critical rules
+  agents/                     the selectable MIDAS CIVIL Plugin Builder agent
+  copilot-instructions.md     workspace task-context policy
 references/
   mapi.md                     connection, error semantics, reads, writes, image capture
   result-tables.md            POST /post/TABLE, tokens, load-case series, the envelope trap,
@@ -45,8 +48,11 @@ as*: 20 plain-text files at the zip root, nothing compiled or minified, no
 template's `package.json`, `test/` and `mock-midas/` are how a plugin gets built
 and are deliberately absent from the archive the host opens.
 
-```bash
-unzip -l examples/MIDAS_CIVIL_NX_Concurrent_Force_Reporter_v1.0.0.zip
+```powershell
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$zip = [System.IO.Compression.ZipFile]::OpenRead(
+    (Resolve-Path .\examples\MIDAS_CIVIL_NX_Concurrent_Force_Reporter_v1.0.0.zip).Path)
+try { $zip.Entries | Select-Object FullName, Length } finally { $zip.Dispose() }
 ```
 
 `references/example-plugin.md` walks through it: the manifest and the window-size
@@ -55,58 +61,73 @@ why the logic lives in DOM-free modules, why `VALIDATION.md` ships inside the zi
 and has to say what was *not* checked — and a ship checklist to run your own
 archive against.
 
-Ask Claude to "compare my plugin zip against the example" and it will.
+Ask Copilot to "compare my plugin zip against the example".
 
 ## Install
 
-**Recommended — install as a plugin.** This is the only method that can be
-updated in place, so you get corrections as they land.
+Clone this repository and open it in VS Code with GitHub Copilot enabled:
 
-```bash
-claude plugin marketplace add manojkheterpalmidas-arch/midasplugin
-claude plugin install midasplugin@midas-plugins
+```powershell
+git clone https://github.com/manojkheterpalmidas-arch/midasplugin.git
+code .\midasplugin
 ```
 
-Or from inside Claude Code, `/plugin marketplace add manojkheterpalmidas-arch/midasplugin`
-then `/plugin install midasplugin@midas-plugins`.
+Install Node.js to run the offline mock and test harness. Packaging uses
+PowerShell and .NET on Windows.
 
-**Alternative — clone into your skills directory.** Simpler, but it is a
-snapshot: nothing will tell you when it changes, and you update it by hand.
+## Use with GitHub Copilot in VS Code
 
-```bash
-git clone https://github.com/manojkheterpalmidas-arch/midasplugin ~/.claude/skills/midasplugin
-```
+The [workspace skill](.github/skills/midasplugin/SKILL.md) contains the full,
+canonical workflow; there is no root skill or wrapper. The
+[custom agent](.github/agents/midas-civil-plugin-builder.agent.md) uses that
+skill and the shared `references/`, `assets/`, and `examples/` resources.
+These customizations apply to this workspace; they are not installed globally.
 
-Either way, then ask Claude to build a CIVIL NX plugin, or invoke the skill by
-name.
+Ask Copilot to build or debug a CIVIL NX plugin to trigger the skill, or select
+**MIDAS CIVIL Plugin Builder** from the agent picker for a focused workflow.
+
+The [workspace instructions](.github/copilot-instructions.md) apply task-context
+selection rules to Copilot chats, not just the custom agent. Keep each plugin's
+context and implementation under `tasks/<task-name>/`, with a `brief.md`
+identifying its sources, applicable standard editions, examples, code, and tests.
+Name the task when starting work; Copilot should ask if the selection is
+ambiguous and avoid other task folders unless you authorize cross-task work.
+Shared MIDAS guidance remains available. These are behavioral instructions,
+not enforced file-access restrictions.
+
+### Start a task brief
+
+Copy [the task brief template](assets/task-brief.template.md) to
+`tasks/<task-name>/brief.md`. It includes common agent safeguards and a short
+starter brief covering the goal, source material and examples, intended workflow,
+and success checks. Fill in what you know and leave unknowns as `TBD`. The agent
+reads the context, asks focused follow-up questions, and records approved
+decisions as the task develops; a complete specification is not required up front.
+The template is version-controlled outside the ignored `/tasks/` folder, while
+each populated brief and its task material remain local.
 
 ## Update
 
 The skill is corrected whenever a live session turns up something new, so it is
-worth pulling occasionally. **Claude does not fetch this repo on its own** — an
-installed copy stays exactly as it was until you update it.
+worth checking for updates occasionally. Copilot does not update the checkout
+automatically. From the repository root, fetch and review upstream changes before
+integrating them, especially if you have local customizations:
 
-If you installed it as a plugin:
-
-```bash
-claude plugin update midasplugin@midas-plugins
+```powershell
+git fetch origin
+git diff HEAD..origin/main
 ```
 
-If you cloned it into your skills directory:
+Start a new Copilot chat after updating customizations. If the agent or skill
+does not appear, reload the VS Code window.
 
-```bash
-git -C ~/.claude/skills/midasplugin pull
-```
+The template runs on its own too, with no Copilot involved:
 
-**Start a new Claude session afterwards.** A session already running built its
-skill list at startup and will not reliably notice the change.
-
-The template runs on its own too, with no Claude involved:
-
-```bash
-cd assets/template
-node mock-midas/server.js     # then open the URL it prints
-node test/run.js              # 26 assertions, no CIVIL NX needed
+```powershell
+Set-Location .\assets\template
+node .\mock-midas\server.js    # then open the URL it prints
+# In a separate terminal in the template folder:
+node .\test\run.js            # 26 assertions, no CIVIL NX needed
 ```
 
 ## A taste of what's inside

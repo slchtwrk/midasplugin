@@ -17,7 +17,7 @@ param(
         ".gitignore"
     ),
     # Folders excluded wholesale (prefix match on the relative path).
-    [string[]]$ExcludeDirs = @("test", "mock-midas", "node_modules", ".git", ".claude", "scratchpad")
+    [string[]]$ExcludeDirs = @("test", "mock-midas", "node_modules", ".git", ".github", ".vscode", "scratchpad")
 )
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem

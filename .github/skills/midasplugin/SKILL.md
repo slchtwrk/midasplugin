@@ -5,6 +5,12 @@ description: Build, test and package plugins for MIDAS CIVIL NX — the MAPI cli
 
 # MIDAS CIVIL NX plugin builder
 
+This is the canonical GitHub Copilot skill for this repository. Follow the
+[workspace task-context policy](../../copilot-instructions.md) when selecting
+or switching plugin tasks. Paths in commands and inline code below are relative
+to the repository root unless a plugin folder is explicitly specified; run
+repository commands from that root. Shared assets and references remain there.
+
 A MIDAS CIVIL NX plugin is **a static web page in a zip**. The host opens
 `index.html` in an embedded WebView2 browser, hands it a MAPI key on the query
 string, and the page talks to CIVIL NX over HTTPS. There is no plugin SDK, no
@@ -73,8 +79,11 @@ Put the claim in the header of the UI, worded exactly.
 theming, window drag and close, an offline mock server, and a Node test runner.
 Copy it, rename, and start replacing `app.js`.
 
-```bash
-cp -r assets/template ../my-plugin
+From the repository root, copy the template into the agreed active task folder
+(replace `my-plugin` with the selected task name):
+
+```powershell
+Copy-Item -LiteralPath .\assets\template -Destination .\tasks\my-plugin -Recurse
 ```
 
 Then set the name in `manifest.json`, `index.html` (title + header), and
@@ -140,12 +149,13 @@ inside a folder.
 **Compare against the worked example before you ship.**
 `examples/MIDAS_CIVIL_NX_Concurrent_Force_Reporter_v1.0.0.zip` is a real
 released plugin — 20 plain-text files, nothing compiled, no `node_modules`, no
-test suite, no mock server, no external requests. Unzip it beside your own
-archive and check the two look alike:
+test suite, no mock server, no external requests. Inspect it beside your own
+archive and check the two look alike. From the repository root, build and verify
+your archive with:
 
-```bash
-unzip -l examples/MIDAS_CIVIL_NX_Concurrent_Force_Reporter_v1.0.0.zip
-unzip -l your-plugin.zip | grep '\\' && echo "BACKSLASHES — the host may refuse this"
+```powershell
+.\assets\scripts\pack.ps1 -Source .\tasks\my-plugin -Out .\tasks\my-plugin.zip
+.\assets\scripts\verify-zip.ps1 -Source .\tasks\my-plugin -Zip .\tasks\my-plugin.zip
 ```
 
 `references/example-plugin.md` is the annotated walk-through: the manifest, the
@@ -158,15 +168,19 @@ Load these as needed; do not read them all up front.
 
 | File | What it holds |
 |---|---|
-| `references/mapi.md` | Connection, error semantics, `/db/` reads, `PUT` writes, `/view/CAPTURE`, the exact failure messages and what each means |
-| `references/result-tables.md` | `POST /post/TABLE` — the Argument shape, table tokens, load-case series suffixes, the envelope-addressing trap that returns silence, and construction-stage results: the `OPT_CS` family split, enumerating what a model publishes, and reading a stage case at post-stage |
-| `references/write-shapes.md` | Verified payloads: NODE, ELEM, MATL, SECT, THIK, GRUP, tendons, moving load (MVHL/MVLDBS), load combinations and the Base/Final stage restriction on writing them, the field-name traps and the name/description length caps |
-| `references/host.md` | The plugin host contract: query string, window messages, manifest, packaging, WebView2 quirks |
-| `references/ui.md` | Layout and theming conventions that make a plugin look native beside MIDAS's own, plus moaui component notes for patching shipped bundles |
-| `references/testing.md` | The mock + Node harness pattern, and how to verify offline |
-| `references/probing.md` | How to settle an unknown API shape by writing to a scratch model |
-| `references/pitfalls.md` | The consolidated checklist — read before shipping |
-| `references/example-plugin.md` | The worked example: what a finished plugin zip contains, annotated, with a ship checklist |
+| [mapi.md](../../../references/mapi.md) | Connection, error semantics, `/db/` reads, `PUT` writes, `/view/CAPTURE`, the exact failure messages and what each means |
+| [result-tables.md](../../../references/result-tables.md) | `POST /post/TABLE` — the Argument shape, table tokens, load-case series suffixes, the envelope-addressing trap that returns silence, and construction-stage results: the `OPT_CS` family split, enumerating what a model publishes, and reading a stage case at post-stage |
+| [write-shapes.md](../../../references/write-shapes.md) | Verified payloads: NODE, ELEM, MATL, SECT, THIK, GRUP, tendons, moving load (MVHL/MVLDBS), load combinations and the Base/Final stage restriction on writing them, the field-name traps and the name/description length caps |
+| [host.md](../../../references/host.md) | The plugin host contract: query string, window messages, manifest, packaging, WebView2 quirks |
+| [ui.md](../../../references/ui.md) | Layout and theming conventions that make a plugin look native beside MIDAS's own, plus moaui component notes for patching shipped bundles |
+| [testing.md](../../../references/testing.md) | The mock + Node harness pattern, and how to verify offline |
+| [probing.md](../../../references/probing.md) | How to settle an unknown API shape by writing to a scratch model |
+| [pitfalls.md](../../../references/pitfalls.md) | The consolidated checklist — read before shipping |
+| [example-plugin.md](../../../references/example-plugin.md) | The worked example: what a finished plugin zip contains, annotated, with a ship checklist |
+
+Shared resources: [template](../../../assets/template/),
+[packaging scripts](../../../assets/scripts/), and
+[shipped examples](../../../examples/).
 
 `examples/` holds the example plugin itself, as the zip that was actually
 released. `assets/icon-frame.png` is the house icon frame, already embedded in

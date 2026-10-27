@@ -9,7 +9,7 @@ param(
     [Parameter(Mandatory = $true)][string]$Source,
     [Parameter(Mandatory = $true)][string]$Zip,
     [string[]]$Exclude = @("package.json", "package-lock.json", ".gitignore"),
-    [string[]]$ExcludeDirs = @("test", "mock-midas", "node_modules", ".git", ".claude", "scratchpad")
+    [string[]]$ExcludeDirs = @("test", "mock-midas", "node_modules", ".git", ".github", ".vscode", "scratchpad")
 )
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem

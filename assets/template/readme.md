@@ -6,6 +6,9 @@ that went wrong on a real plugin — read the comments before deleting anything.
 
 ## Run it without CIVIL NX
 
+Open this plugin folder in VS Code and select **Plugin mock** in Run and Debug,
+or run the following from the plugin folder:
+
 ```bash
 node mock-midas/server.js
 ```
@@ -36,7 +39,7 @@ local `"type": "commonjs"` has gone missing.
 ..\..\scripts\verify-zip.ps1 -Source . -Zip "$env:USERPROFILE\Downloads\My Plugin v1.0.0.zip"
 ```
 
-`pack.ps1` excludes `test/`, `mock-midas/` and `package.json`, builds the archive
+`pack.ps1` excludes `test/`, `mock-midas/`, `.github/`, `.vscode/` and `package.json`, builds the archive
 with forward-slash separators (`Compress-Archive` does not), and refuses to
 finish unless `index.html` is at the zip root.
 
